@@ -39,7 +39,8 @@ VAT_CODES = {0.0: 0,
              9.0: 3}
 
 
-BAD_CHARS = set("',%")
+BAD_CHARS = set("',%’‘“”")
+
 
 
 THRESHOLD = 0.8 

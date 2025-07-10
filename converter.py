@@ -60,13 +60,18 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
 
     messages = []
     col_map = {}
+    used_columns = set()
 
-    # Step 1: Resolve headers
-    for key, possible_names in CLOTHING_HEADER_MAP.items():
-        col, message, type = find_header(df, possible_names)
+
+    # # Step 1: Resolve headers
+    for key in CLOTHING_HEADER_MAP:
+        col, message, type = find_header(df, CLOTHING_HEADER_MAP[key], used_columns)
+        if col:
+            used_columns.add(col)
+        col_map[key] = col  # May be None if not found
         if message:
             messages.append((message, type))
-        col_map[key] = col
+
 
     # Step 2: Check for required columns
     for key, col in col_map.items():
@@ -123,10 +128,12 @@ def read_column(df: pd.DataFrame, possible_names, used_columns=None) -> list:
 
 
 
-# df = pd.read_excel(YOUNGS_UPLOAD)
+# df = pd.read_excel(TEST_UPLOAD_2)
 # df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
 
 # products, messages = load_products(df)
 
 # print(products[:5])
 
+# prod_barcode_errors = duplicate_barcodes(products, "plu_code")
+# print(prod_barcode_errors)

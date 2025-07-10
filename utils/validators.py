@@ -31,9 +31,11 @@ def duplicate_barcodes(items: list[Product | Clothing], attr:str) -> list[str]:
     for item in items:
         if item.barcode:  # Skip empty or None
             id = normalizer(getattr(item, attr, None))
+            barcode = str(item.barcode).strip()
             barcode_to_code[item.barcode].append((id, item.excel_line))
 
     for barcode, codes in barcode_to_code.items():
+        print(f"searching in: {barcode_to_code.items()}")
         if len(codes) > 1:
             detail = ", ".join([f"{code} (line {line})" for code, line in codes])
             error_list.append(f"Barcode {barcode} is shared by: {detail}")

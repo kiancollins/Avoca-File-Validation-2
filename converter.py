@@ -3,32 +3,26 @@ import pandas as pd
 from classes.product_class import Product
 from classes.clothing_class import Clothing
 from utils.headers import *
+from utils.validators import *
 
 
 
 def load_products(df: pd.DataFrame) -> tuple[list[Product], list[tuple[str, str]]]:
     """Load the new product file into a list of Product class objects"""
     # expected_headers = [name for sublist in PRODUCT_HEADER_MAP.values() for name in sublist]
-    # header_row = detect_header_row(path, expected_headers)
-    # df = pd.read_excel(path, header=header_row)
-    # df.columns = [normalize_header(c) for c in df.columns]
 
-
-    # print(df.head(5))
-    # print(df.columns.tolist())
     messages = []
     
     # Pre-resolve all needed column names
+    used_columns = set()
     col_map = {}
     for key in PRODUCT_HEADER_MAP:
-        col, message, type = find_header(df, PRODUCT_HEADER_MAP[key])
+        col, message, type = find_header(df, PRODUCT_HEADER_MAP[key], used_columns)
+        if col:
+            used_columns.add(col)
         col_map[key] = col  # May be None if not found
         if message:
             messages.append((message, type))
-
-    # print("\n=== Final resolved columns ===")
-    # for key, val in col_map.items():    
-    #     print(f"{key}: {val}")
 
     # Build Product objects using resolved column names
     products = []
@@ -112,14 +106,27 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
 
 
 
-def read_column(df: pd.DataFrame, possible_names) -> list:
+def read_column(df: pd.DataFrame, possible_names, used_columns=None) -> list:
     """Find the given column name and return that column as a list.
     Converts all objects to strings"""
     if isinstance(possible_names, str):
         possible_names = [possible_names]
 
-    col_name, msg, msg_type = find_header(df, possible_names)
+    if used_columns is None:
+        used_columns = set()
+
+    col_name, msg, msg_type = find_header(df, possible_names, used_columns)
     if col_name is not None and col_name in df.columns:
+        used_columns.add(col_name)
         return df[col_name].dropna().apply(normalizer).tolist(), msg, msg_type
     return [], msg, msg_type
+
+
+
+# df = pd.read_excel(YOUNGS_UPLOAD)
+# df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
+
+# products, messages = load_products(df)
+
+# print(products[:5])
 

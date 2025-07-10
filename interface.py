@@ -40,7 +40,7 @@ def display_results(title: str, errors: list[str]):
 
 
 st.title("New Product File Validation")
-file_type = st.selectbox("Select File Type", ["Product", "Clothing"])
+file_type = st.selectbox("Select File Type", ["Product", "Clothing", "Price Amendment"])
 
 # File uploads
 new_file = st.file_uploader(f"Upload New {file_type} File", type=["xlsx"])
@@ -311,5 +311,24 @@ elif file_type == "Clothing" and new_file and full_list_file:
 
 
 
+elif file_type == "Price Amendment" and new_file and full_list_file:
+
+    # Read new file
+    df = pd.read_excel(new_file)
+    df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
+    products, messages = load_products(df)
+
+    # Read full list
+    full_list_df = pd.read_excel(full_list_file)
+    full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
+    full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
 
 
+
+    results = check_exist(products, full_list_df, "plu_code")
+    results_2 = []
+
+
+    if results:
+        display_results("Non-amendable products", results)
+    

@@ -16,9 +16,9 @@ TEST_UPLOAD_2 = "1_Spreadsheets/test upload 2.xlsx"
 
 ERROR_TYPES = {
     # Product checks
-    "Duplicate PLU Code Errors": "PLU Codes are all available.", 
-    "Duplicate PLUs Within Uploaded File": "No Duplicate PLU Codes.",
-    "PLU Code Length Errors": "PLU Code lengths are all valid.",
+    "Duplicate PLU Code Errors": "PLU codes are all available.", 
+    "Duplicate PLUs Within Uploaded File": "No Duplicate PLU codes within new file.",
+    "PLU Code Length Errors": "PLU code lengths are all valid.",
     "Product Description Length Errors": "Product descriptions are all valid.",
     "Decimal Formatting Errors": "All numbers rounded correctly.",
 
@@ -31,6 +31,9 @@ ERROR_TYPES = {
     "Duplicate Style Codes Within Uploaded File": "No Duplicate Style Codes.",
     "Style Code Length Errors": "Style Code lengths are all valid.",
     "Clothing Item Description Length Errors": "Descriptions are all valid.",
+
+    # Price Amendment
+    "Non-amendable products": "Products all exist in database"
 }
 
 
@@ -39,7 +42,7 @@ VAT_CODES = {23.0: 1,
              9.0: 3}
 
 
-BAD_CHARS = set("'%’‘“”")
+BAD_CHARS = set("'%’‘“”`")
 
 
 THRESHOLD = 0.8 

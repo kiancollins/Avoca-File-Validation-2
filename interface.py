@@ -58,9 +58,9 @@ if file_type == "Product" and new_file and full_list_file:
         df.columns = [normalize_header(c) for c in df.columns]
 
         missing = check_missing_headers(df, PRODUCT_HEADER_MAP)                         # Check missing columns
-        if missing:
-            st.warning(f"Columns not found in new file: {','.join(missing)}")
-        else:
+        if not missing:
+        #     st.warning(f"Columns not found in new file: {','.join(missing)}")
+        # else:
             st.success(f"All expected columns found in new file.")
         
         df, auto_changes = update_all_products(df)                        # Apply auto-changes
@@ -130,9 +130,9 @@ if file_type == "Product" and new_file and full_list_file:
         if (e := product.plu_len()):
             plu_errors.append(e)
         # if (e := product.desc_len()):
-        #     prod_desc_errors.append(e)
-        if (e := bad_char(product, "plu_code")):
-            prod_bad_char_errors.append(e)
+        # #     prod_desc_errors.append(e)
+        # if (e := bad_char(product, "plu_code")):
+        #     prod_bad_char_errors.append(e)
         # if (e := product.decimal_format()):
         #     decimal_errors.append(e)
         
@@ -151,7 +151,7 @@ if file_type == "Product" and new_file and full_list_file:
                 prod_desc_errors, prod_bad_char_errors, decimal_errors, prod_barcode_errors]):
         st.success("All checks passed. File is ready for upload.")
 
-    elif len(auto_changes.items()) > len(auto_changes.keys()):
+    if any(auto_changes.values()):
         st.write("\n")
         st.title("Automatically Fixed Errors:")
 
@@ -256,11 +256,11 @@ elif file_type == "Clothing" and new_file and full_list_file:
         if (e := item.style_len()):
             style_len_errors.append(e)
         # if (e := item.colour_len()):
-            colour_len_errors.append(e)
-        if (e := bad_char(item, "style_code")):
-            clothing_bad_char_errors.append(e)
+        #     colour_len_errors.append(e)
+        # if (e := bad_char(item, "style_code")):
+            # clothing_bad_char_errors.append(e)
         # if (e := item.desc_len()):
-            clothing_decsc_errors.append(e)
+            # clothing_decsc_errors.append(e)
 
             
 # Display Errors
@@ -279,7 +279,7 @@ elif file_type == "Clothing" and new_file and full_list_file:
         st.success("All checks passed. File is ready for upload.")
 
 # Auto fixing ------------------
-    elif len(auto_changes.items()) > len(auto_changes.keys()):
+    if any(auto_changes.values()):
         st.write("\n")
         st.title("Automatically Fixed Errors:")
 

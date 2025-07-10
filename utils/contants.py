@@ -65,7 +65,7 @@ PRODUCT_HEADER_MAP = {
 
 
 CLOTHING_HEADER_MAP = {
-    "style_code": ["stylecode", "style code", "style-code", "style_code"],
+    "style_code": ["stylecode", "productstylecode", "style-code", "style_code"],
     "description": ["description", "desc"],
     "size": ["size"],
     "colour": ["colour", "color"],

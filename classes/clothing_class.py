@@ -5,7 +5,7 @@ import streamlit as st
 class Clothing:
     def __init__(self, code, description, size, colour, subgroup, supplier_code, season, 
                  main_supplier, cost_price, barcode, vat_rate, rrp, sell_price, stg_price, 
-                 tarriff, brand, product_type, web, country, country_code, idx=None):
+                 tariff, brand, product_type, web, country, country_code, idx=None):
         
         self.style_code = code
         self.description = description
@@ -21,7 +21,7 @@ class Clothing:
         self.rrp = rrp
         self.sell_price = sell_price
         self.stg_price = stg_price
-        self.tarriff = tarriff
+        self.tariff = tariff
         self.brand = brand
         self.product_type = product_type
         self.web = web

@@ -53,13 +53,13 @@ PRODUCT_HEADER_MAP = {
     "season": ["season"],
     "main_supplier": ["mainsupplier", "main-supplier", "supplier", "suppliermain", "productsupplier"],
     "cost_price": ["costprice", "cost"],
-    "barcode": ["barcode", "bar code", "productbarcode","product-barcode"],
+    "barcode": ["barcode", "bar code", "productbarcode", "product-barcode", "barcodes", "barcode(s)"],
     "vat_rate": ["vatrate", "vat", "vatcode", "vat-code", "productvatrate", "productvatcode"],
     "rrp": ["rrp"],
     "sell_price": ["sellingprice", "sellprice", "priceforsell", "selling", "productsellingprice"],
     "stg_price": ["stgprice", "stgretailprice", "sterlingprice", "productstgprice"],
-    "tarriff": ["tarriffcode", "tarrif"],
-    "web": ["web"]
+    "tariff": ["tariffcode", "tariff"],
+    "web": ["web", "forweb"]
     
 }
 
@@ -74,15 +74,15 @@ CLOTHING_HEADER_MAP = {
     "season": ["season"],
     "main_supplier": ["mainsupplier", "main supplier"],
     "cost_price": ["costprice", "cost price", "cost"],
-    "barcode": ["barcode", "bar code"],
+    "barcode": ["barcode", "bar code", "productbarcode", "barcodes", "barcode(s)"],
     "vat_rate": ["vatrate", "vat rate", "vat", "vatcode"],
     "rrp": ["rrp"],
     "sell_price": ["sellingprice", "selling price", "sellprice"],
     "stg_price": ["stgretailprice", "stg retail price", "stgprice"],
-    "tarriff": ["tarriffcode", "tarriff code", "tariff", "tarrif"],
+    "tariff": ["tariffcode", "tariff code", "tariff", "tariff"],
     "brand": ["brandinstore", "brand in store", "brand"],
     "product_type": ["producttype", "product type"],
-    "web": ["web", "online", "website"],
+    "web": ["web", "online", "website", "forweb"],
     "country": ["countryoforigin", "country of origin", "origin"],
     "country_code": ["countrycode", "country code"],
 }

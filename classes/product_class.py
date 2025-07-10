@@ -3,7 +3,7 @@ import streamlit as st
 
 class Product:
     def __init__(self, code, description, subgroup, supplier_code, season, 
-                 main_supplier, cost_price, barcode, vat_rate, rrp, sell_price, stg_price, tarriff, web, idx=None):
+                 main_supplier, cost_price, barcode, vat_rate, rrp, sell_price, stg_price, tariff, web, idx=None):
         self.plu_code = code
         self.description = description
         self.subgroup = subgroup
@@ -16,7 +16,7 @@ class Product:
         self.rrp = rrp
         self.sell_price = sell_price
         self.stg_price = stg_price
-        self.tarriff = tarriff
+        self.tariff = tariff
         self.web = web
         self.excel_line = idx
 

@@ -331,4 +331,7 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
 
     if results:
         display_results("Non-amendable products", results)
+    else:
+        st.success("All products exist. File is ready for upload.")
+
     

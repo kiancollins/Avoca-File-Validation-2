@@ -41,7 +41,7 @@ def load_products(df: pd.DataFrame) -> tuple[list[Product], list[tuple[str, str]
             rrp = row.get(col_map["rrp"]),
             sell_price = row.get(col_map["sell_price"]),
             stg_price = row.get(col_map["stg_price"]),
-            tarriff = row.get(col_map["tarriff"]),
+            tariff = row.get(col_map["tariff"]),
             web = row.get(col_map["web"]),
             idx = line_number
         )
@@ -97,7 +97,7 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
             rrp=row.get(col_map["rrp"]),
             sell_price=row.get(col_map["sell_price"]),
             stg_price=row.get(col_map["stg_price"]),
-            tarriff=row.get(col_map["tarriff"]),
+            tariff=row.get(col_map["tariff"]),
             brand=row.get(col_map["brand"]),
             product_type=row.get(col_map["product_type"]),
             web=row.get(col_map["web"]),

@@ -4,6 +4,7 @@ from classes.product_class import Product
 from classes.clothing_class import Clothing
 from utils.headers import *
 from utils.validators import *
+from price_amendment import *
 
 
 
@@ -29,7 +30,7 @@ def load_products(df: pd.DataFrame) -> tuple[list[Product], list[tuple[str, str]
     for idx, row in df.iterrows():
         line_number = idx + 2
         product = Product(
-            code = row.get(col_map["plu_code"]),
+            code = normalizer(row.get(col_map["plu_code"])),
             description = row.get(col_map["description"]),
             subgroup = row.get(col_map["subgroup"]),
             supplier_code = row.get(col_map["supplier_code"]),
@@ -128,12 +129,24 @@ def read_column(df: pd.DataFrame, possible_names, used_columns=None) -> list:
 
 
 
-# df = pd.read_excel(TEST_UPLOAD_2)
+
+
+# df = pd.read_excel(NEW_PRODUCTS_JAVADO)
 # df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
-
 # products, messages = load_products(df)
+# for product in products:
+#     print(product.plu_code)
+#     print(type(product.plu_code))
 
-# print(products[:5])
+# full_list_df = pd.read_excel(PLU_ACTIVE)
+# full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
+# full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
+# print(full_list_df[:5])
+
 
 # prod_barcode_errors = duplicate_barcodes(products, "plu_code")
 # print(prod_barcode_errors)
+
+
+# errors = check_exist(products, full_list_df, "plu_code")
+# print(errors)

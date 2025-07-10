@@ -63,7 +63,17 @@ if file_type == "Product" and new_file and full_list_file:
         # else:
             st.success(f"All expected columns found in new file.")
         
-        df, auto_changes = update_all_products(df)                        # Apply auto-changes
+    # Keep track of unrecognized header names
+        recognized = set()
+        for alias_list in PRODUCT_HEADER_MAP.values():
+            recognized.update([normalize_header(h) for h in alias_list])
+
+        unrecognized = [col for col in df.columns if col not in recognized]
+        if unrecognized:
+            st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
+
+    # Apply auto-changes
+        df, auto_changes = update_all_products(df)                       
 
     except Exception as e:
         st.error(f"Error reading or fixing new product file: {e}")
@@ -188,6 +198,16 @@ elif file_type == "Clothing" and new_file and full_list_file:
         else:
             st.success(f"All expected columns found in new file.")
         
+    # Keep track of unrecognized header names
+        recognized = set()
+        for alias_list in CLOTHING_HEADER_MAP.values():
+            recognized.update([normalize_header(h) for h in alias_list])
+
+        unrecognized = [col for col in df.columns if col not in recognized]
+        if unrecognized:
+            st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
+
+    # Apply auto fixes
         df, auto_changes = update_all_clothing(df)         
     except Exception as e:
         st.error(f"Error reading or fixing new clothing file: {e}")
@@ -224,18 +244,6 @@ elif file_type == "Clothing" and new_file and full_list_file:
     except Exception as e:
         st.error(f"Error reading full items list: {e}")
         st.stop()
-
-
-
-# # Error collection ---------
-#     print("=== Sample from clothing objects ===")
-#     for c in clothes[:5]:
-#         print(f"Style code: {c.style_code} → {normalizer(c.style_code)}")
-
-#     print("\n=== Sample from full list ===")
-#     for s in all_style_codes[:5]:
-#         print(f"From full list: {s} → {normalizer(s)}")
-
 
 
     duplicate_styles = check_duplicates(clothes, full_list_df, "style_code")

@@ -5,12 +5,13 @@ Constant variables that get called throughout this program
 """
 
 
-NEW_PRODUCTS_GARDEN = "Spreadsheets/0107025 GARDEN FRESH.xlsx" 
-NEW_PRODUCTS_JAVADO = "Spreadsheets/JAVADO UPLOAD.xlsx"
-PLU_ACTIVE = "Spreadsheets/PLU-Active-List.xlsx"
-CLOTHING_UPLOAD = "Spreadsheets/lothing upload example.xlsx"
-FULL_CLOTHING = "Spreadsheets/full_clothing_listing.xlsx"
-BAD_PROD_UPLOAD = "Spreadsheets/NG New Product 080425.xlsx"
+NEW_PRODUCTS_GARDEN = "1_Spreadsheets/0107025 GARDEN FRESH.xlsx" 
+NEW_PRODUCTS_JAVADO = "1_Spreadsheets/JAVADO UPLOAD.xlsx"
+PLU_ACTIVE = "1_Spreadsheets/PLU-Active-List.xlsx"
+CLOTHING_UPLOAD = "1_Spreadsheets/lothing upload example.xlsx"
+FULL_CLOTHING = "1_Spreadsheets/full_clothing_listing.xlsx"
+BAD_PROD_UPLOAD = "1_Spreadsheets/NG New Product 080425.xlsx"
+YOUNGS_UPLOAD = "1_Spreadsheets/YOUNGS.xlsx"
 
 
 ERROR_TYPES = {
@@ -33,14 +34,12 @@ ERROR_TYPES = {
 }
 
 
-VAT_CODES = {0.0: 0,
-             23.0: 1,
+VAT_CODES = {23.0: 1,
              13.5: 2,
              9.0: 3}
 
 
 BAD_CHARS = set("',%’‘“”")
-
 
 
 THRESHOLD = 0.8 

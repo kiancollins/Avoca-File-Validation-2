@@ -12,11 +12,11 @@ CLOTHING_UPLOAD = "1_Spreadsheets/lothing upload example.xlsx"
 FULL_CLOTHING = "1_Spreadsheets/full_clothing_listing.xlsx"
 BAD_PROD_UPLOAD = "1_Spreadsheets/NG New Product 080425.xlsx"
 YOUNGS_UPLOAD = "1_Spreadsheets/YOUNGS.xlsx"
-
+TEST_UPLOAD_2 = "1_Spreadsheets/test upload 2.xlsx"
 
 ERROR_TYPES = {
     # Product checks
-    "Duplicate PLU Code Errors": "PLU Codes are all valid.", 
+    "Duplicate PLU Code Errors": "PLU Codes are all available.", 
     "Duplicate PLUs Within Uploaded File": "No Duplicate PLU Codes.",
     "PLU Code Length Errors": "PLU Code lengths are all valid.",
     "Product Description Length Errors": "Product descriptions are all valid.",
@@ -39,7 +39,7 @@ VAT_CODES = {23.0: 1,
              9.0: 3}
 
 
-BAD_CHARS = set("',%’‘“”")
+BAD_CHARS = set("'%’‘“”")
 
 
 THRESHOLD = 0.8 
@@ -47,17 +47,17 @@ THRESHOLD = 0.8
 
 PRODUCT_HEADER_MAP = {
     "plu_code": ["plu", "plu code", "plucode", "plu-code", "plu_code"],
-    "description": ["description", "desc"],
-    "subgroup": ["subgroup", "category", "sub", "subcategory"],
+    "description": ["description", "desc", "productdescription"],
+    "subgroup": ["subgroup", "category", "sub", "subcategory", "productsubgroup"],
     "supplier_code": ["3digitsupplier", "suppliercode", "threedigitsupplier", "3digitsuppliercode", "threedigitsuppliercode"],
     "season": ["season"],
-    "main_supplier": ["mainsupplier", "main-supplier", "supplier", ],
+    "main_supplier": ["mainsupplier", "main-supplier", "supplier", "suppliermain", "productsupplier"],
     "cost_price": ["costprice", "cost"],
-    "barcode": ["barcode", "bar code"],
-    "vat_rate": ["vatrate", "vat", "vatcode", "vat-code"],
+    "barcode": ["barcode", "bar code", "productbarcode","product-barcode"],
+    "vat_rate": ["vatrate", "vat", "vatcode", "vat-code", "productvatrate", "productvatcode"],
     "rrp": ["rrp"],
-    "sell_price": ["sellingprice", "sellprice", "priceforsell", "selling"],
-    "stg_price": ["stgprice", "stgretailprice", "sterlingprice"],
+    "sell_price": ["sellingprice", "sellprice", "priceforsell", "selling", "productsellingprice"],
+    "stg_price": ["stgprice", "stgretailprice", "sterlingprice", "productstgprice"],
     "tarriff": ["tarriffcode", "tarrif"],
     "web": ["web"]
     

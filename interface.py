@@ -7,26 +7,6 @@ from auto_fixes.fix_products import update_all_products
 from auto_fixes.fix_clothing import update_all_clothing
 from utils.validators import *
 
-
-ERROR_TYPES = {
-    # Product checks
-    "Duplicate PLU Code Errors": "PLU Codes are all valid.", 
-    "Duplicate PLUs Within Uploaded File": "No Duplicate PLU Codes.",
-    "PLU Code Length Errors": "PLU Code lengths are all valid.",
-    "Product Description Length Errors": "Product descriptions are all valid.",
-    "Decimal Formatting Errors": "All numbers rounded correctly.",
-
-    # Shared
-    "Unusable Character Errors": "No unusable characters found.",
-    "Duplicate Barcode Errors": "All barcodes are valid.",
-
-    # Clothing checks
-    "Duplicate Style Code Code Errors": "Style Codes are all valid.",
-    "Duplicate Style Codes Within Uploaded File": "No Duplicate Style Codes.",
-    "Style Code Length Errors": "Style Code lengths are all valid.",
-    "Clothing Item Description Length Errors": "Descriptions are all valid.",
-}
-
 def display_results(title: str, errors: list[str]):
     if errors: 
         expander_title = f"{title} — {len(errors)} issue(s)"
@@ -313,25 +293,98 @@ elif file_type == "Clothing" and new_file and full_list_file:
 
 elif file_type == "Price Amendment" and new_file and full_list_file:
 
-    # Read new file
-    df = pd.read_excel(new_file)
-    df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
-    products, messages = load_products(df)
+    # # Read new file
+    # df = pd.read_excel(new_file)
+    # df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
+    # products, messages = load_products(df)
 
-    # Read full list
-    full_list_df = pd.read_excel(full_list_file)
-    full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-    full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
+    # # Read full list
+    # full_list_df = pd.read_excel(full_list_file)
+    # full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
+    # full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
 
+    try:
+            expected_headers = [name for sublist in PRODUCT_HEADER_MAP.values() for name in sublist]
+            header_row = detect_header_row(new_file, expected_headers)
+            df = pd.read_excel(new_file, header=header_row)
+            df.columns = [normalize_header(c) for c in df.columns]
+
+            missing = check_missing_headers(df, PRODUCT_HEADER_MAP)                         # Check missing columns
+            if not missing:
+            #     st.warning(f"Columns not found in new file: {','.join(missing)}")
+            # else:
+                st.success(f"All expected columns found in new file.")
+            
+        # Keep track of unrecognized header names
+            recognized = set()
+            for alias_list in PRODUCT_HEADER_MAP.values():
+                recognized.update([normalize_header(h) for h in alias_list])
+
+            unrecognized = [col for col in df.columns if col not in recognized]
+            if unrecognized:
+                st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
+
+        # # Apply auto-changes
+        #     df, auto_changes = update_all_products(df)                       
+
+    except Exception as e:
+        st.error(f"Error reading or fixing new product file: {e}")
+        st.stop()
+
+    # Step 2: Load as Product class objects ----------
+    try:
+        products, messages = load_products(df) # was new file
+        missing = []
+        for message, type in messages:
+            if type == "alert":
+                st.success(message)
+            elif type == "error":
+                missing.append(message)
+        if missing:
+            st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
+
+
+    except Exception as e:
+        st.error(f"Error loading new product file into Product objects: {e}")
+        st.stop()
+
+    # Step 3: Load PLU list ---------
+    try:
+        full_list_df = pd.read_excel(full_list_file)
+        full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
+        full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
+
+
+        missing = []
+        if message:
+            if type == "alert":
+                st.success(message)
+            elif type == "error":
+                missing.append(message)
+        if missing:
+            st.warning(f"Searched for, but couldn't find columns: {missing} in full list upload.")
+
+    except KeyError as e:
+        st.error(f"Missing PLU column in full list: {e}")
+        st.stop()
+    except Exception as e:
+        st.error(f"Error reading PLU Active List: {e}")
+        st.stop()
+    
 
 
     results = check_exist(products, full_list_df, "plu_code")
-    results_2 = []
 
 
-    if results:
-        display_results("Non-amendable products", results)
+    # if results:
+    #     display_results("Non-amendable products", results)
+    # else:
+
+
+    if results: 
+        st.header(f"Non-amendable products — {len(results)} issue(s)")
+        for err in results:
+            st.error(f"- {err}")
     else:
+        st.header(f"Non-amendable products — 0 issue(s)")
         st.success("All products exist. File is ready for upload.")
-
-    

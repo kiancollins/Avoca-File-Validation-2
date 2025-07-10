@@ -3,29 +3,28 @@ from decimal import Decimal
 import math
 
 from utils.contants import *
+from utils.headers import *
 
 
 
 def fix_description(df: pd.DataFrame):
-    """Remove any bad characters and cut description down to 50 characters"""
+    """ Shorten the description to just 50 characters"""
     changes = []
-    for i, desc in df['description'].items():
+    desc_col, *_ = find_header(df, PRODUCT_HEADER_MAP["description"], used_columns=None)
+    if desc_col is None or desc_col not in df.columns:
+        return df, []
+
+    for i, desc in df[desc_col].items():
         if isinstance(desc, str):
             og_desc = desc
-            cleaned = ''.join(c for c in desc if c not in BAD_CHARS)
-            final = cleaned
+            final = desc
 
-            if og_desc != cleaned:
-                changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 Bad characters removed from description: '{og_desc}', updated to '{cleaned}'")
-                        
-            if len(cleaned) > 50:
-                final = cleaned[:50]
+            if len(desc) > 50:
+                final = desc[:50]
                 changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 Long description: '{og_desc}' shortened to '{final}'")
-            
             if desc != final:
-                df.at[i, 'description'] = final
+                df.at[i, desc_col] = final
     return df, changes
-
 
 
 def fix_decimals(df: pd.DataFrame):
@@ -84,6 +83,27 @@ def fix_color(df: pd.DataFrame):
 
 
 
+def fix_bad_char(df: pd.DataFrame) -> str:
+    """ The characters ',% can't be in any product variables. Check if they have any and return where.
+        Input for id_attr should be the code/name of item preferred when returning an error message.
+    """
+    changes = []
+    for col in df.columns:
+        if df[col].dtype == object:
+            for i, val in df[col].items():
+                if isinstance(val, str):          # Avoid type error
+                    cleaned = ''.join(char for char in val if char not in BAD_CHARS)
+
+                    if val != cleaned:
+                        df.at[i, col] = cleaned
+                        changes.append(f"Line {i} \u00A0\u00A0|\u00A0\u00A0 Bad characters removed from column '{col}'")
+
+    return df, changes
+
+
+
+
+
 def update_all_clothing(df: pd.DataFrame):
     df = df.copy()
     
@@ -91,6 +111,9 @@ def update_all_clothing(df: pd.DataFrame):
 
     df, desc_changes = fix_description(df)
     changes["Description Fixes"] = desc_changes
+
+    df, char_changes = fix_bad_char(df)
+    changes["Bad Char Fixes"] = char_changes
 
     df, decimal_changes = fix_decimals(df)
     changes["Decimal Fixes"] = decimal_changes

@@ -9,20 +9,17 @@ from utils.headers import *
 def fix_description(df: pd.DataFrame):
     """ Remove any bad characters and shorten the description to just 50 characters"""
     changes = []
-    desc_col, *_ = find_header(df, PRODUCT_HEADER_MAP["description"])
+    desc_col, *_ = find_header(df, PRODUCT_HEADER_MAP["description"], used_columns=None)
     if desc_col is None or desc_col not in df.columns:
         return df, []
 
     for i, desc in df[desc_col].items():
         if isinstance(desc, str):
             og_desc = desc
-            cleaned = ''.join(c for c in desc if c not in BAD_CHARS)
-            final = cleaned
+            final = desc
 
-            if og_desc != cleaned:
-                changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 Bad characters removed from description: '{og_desc}', updated to '{cleaned}'")
-            if len(cleaned) > 50:
-                final = cleaned[:50]
+            if len(desc) > 50:
+                final = desc[:50]
                 changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 Long description: '{og_desc}' shortened to '{final}'")
             if desc != final:
                 df.at[i, desc_col] = final
@@ -36,7 +33,7 @@ def fix_decimals(df: pd.DataFrame):
     changes = []
 
     for key in columns:
-        col_name, *_ = find_header(df, PRODUCT_HEADER_MAP[key])
+        col_name, *_ = find_header(df, PRODUCT_HEADER_MAP[key], used_columns=None)
         if col_name is None or col_name not in df.columns:
             continue
 
@@ -55,7 +52,7 @@ def fix_vat(df: pd.DataFrame):
     """Assign the correct VAT codes for given percentages"""
     changes = []
 
-    vat_col, *_ = find_header(df, PRODUCT_HEADER_MAP["vat_rate"]) 
+    vat_col, *_ = find_header(df, PRODUCT_HEADER_MAP["vat_rate"], used_columns=None) 
     if vat_col is None or vat_col not in df.columns:
         return df, []
 
@@ -68,16 +65,22 @@ def fix_vat(df: pd.DataFrame):
 
 
 
-def update_all_products(df: pd.DataFrame):
-    """Call fix functions and returns updated dataframe (a copy)"""
-    df = df.copy()
-    df.columns = df.columns.str.lower().str.strip().str.replace(" ", "")  # Normalize here
-    new_description, desc_changes = fix_description(df)
-    new_decimals, decimal_changes = fix_decimals(new_description)
-    new_vat, vat_changes = fix_vat(new_decimals)
-    # print("Final columns available:", df.columns.tolist())
+def fix_bad_char(df: pd.DataFrame) -> str:
+    """ The characters ',% can't be in any product variables. Check if they have any and return where.
+        Input for id_attr should be the code/name of item preferred when returning an error message.
+    """
+    changes = []
+    for col in df.columns:
+        if df[col].dtype == object:
+            for i, val in df[col].items():
+                if isinstance(val, str):          # Avoid type error
+                    cleaned = ''.join(char for char in val if char not in BAD_CHARS)
 
-    return new_vat, desc_changes + decimal_changes + vat_changes
+                    if val != cleaned:
+                        df.at[i, col] = cleaned
+                        changes.append(f"Line {i} \u00A0\u00A0|\u00A0\u00A0 Bad characters removed from column '{col}'")
+
+    return df, changes
 
 
 
@@ -87,6 +90,9 @@ def update_all_products(df: pd.DataFrame):
 
     df, desc_changes = fix_description(df)
     changes_by_type["Description Fixes"] = desc_changes
+
+    df, char_changes = fix_bad_char(df)
+    changes_by_type["Bad Char Fixes"] = char_changes
 
     # df, decimal_changes = fix_decimals(df)
     # changes_by_type["Decimal Fixes"] = decimal_changes

@@ -43,19 +43,22 @@ def detect_header_row(file_path, expected_headers, max_rows=10):
 
 
 
-def find_header(df: pd.DataFrame, possible_names: dict):
+def find_header(df: pd.DataFrame, possible_names: dict, used_columns: set[str]):
     """ Identify column based on a possible names reference dictionary.
         If reference dictionary doesn't work, use char match. """
-
     normalized_cols = {normalize_header(col): col for col in df.columns}
-    # for col in df.columns:
-    #         print(f"  - '{col}' → '{normalize_header(col)}'")
+    possible_normalized = [normalize_header(name) for name in possible_names]
 
-    # Main: Exact match
-    for name in possible_names:
-        key = normalize_header(name)
-        if key in normalized_cols:
-            return normalized_cols[key], "", "skip"
+    if used_columns is None:
+        used_columns = set()
+
+
+        # Main: Exact match
+    for name in possible_normalized:
+        if name in normalized_cols:
+            col_name = normalized_cols[name]
+            if col_name not in used_columns:
+                return col_name, "", "skip"
 
     # Back up: Char match
     best_score = 0
@@ -63,14 +66,14 @@ def find_header(df: pd.DataFrame, possible_names: dict):
     original_header = None
 
     for col_key in normalized_cols.keys():
-            for name in possible_names:
-                score = char_match(name, col_key)
-                # print(f"Comparing expected: {name} vs found: {col_key} → score {score:.2f}")
-
-                if score > best_score:
-                    best_score = score
-                    best_possible = name
-                    original_header = normalized_cols[col_key]
+        if normalized_cols[col_key] in used_columns:
+            continue
+        for name in possible_names:
+            score = char_match(normalize_header(name), col_key)
+            if score > best_score:
+                best_score = score
+                best_possible = name
+                original_header = normalized_cols[col_key]
     
     if best_score >= THRESHOLD:  # ← adjust threshold as needed
         msg = f"CHAR_MATCH updated the column header '{original_header}' to '{best_possible}' to match template spreadsheet"

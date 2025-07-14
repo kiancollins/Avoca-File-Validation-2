@@ -23,7 +23,7 @@ def check_duplicates(items: list[Product | Clothing], full_list: list, attr: str
     return duplicates
 
 
-def duplicate_barcodes(items: list[Product | Clothing], attr:str) -> list[str]:
+def duplicate_internal_barcodes(items: list[Product | Clothing], attr:str) -> list[str]:
     """ Checks to see if any products in new product file has the same barcodes."""
     barcode_to_code = defaultdict(list)
     error_list = []
@@ -45,6 +45,10 @@ def duplicate_barcodes(items: list[Product | Clothing], attr:str) -> list[str]:
     if len(error_list) > 0:
         return error_list
     return None
+
+
+
+
 
 
 def check_internal_duplicates(items: list[Product | Clothing], attr:str) -> dict[int, int]:

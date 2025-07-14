@@ -6,6 +6,7 @@ from converter import *
 from auto_fixes.fix_products import update_all_products
 from auto_fixes.fix_clothing import update_all_clothing
 from utils.validators import *
+from utils.headers import *
 
 def display_results(title: str, errors: list[str]):
     if errors: 
@@ -39,16 +40,10 @@ if file_type == "Product" and new_file and full_list_file:
 
         missing = check_missing_headers(df, PRODUCT_HEADER_MAP)                         # Check missing columns
         if not missing:
-        #     st.warning(f"Columns not found in new file: {','.join(missing)}")
-        # else:
             st.success(f"All expected columns found in new file.")
         
     # Keep track of unrecognized header names
-        recognized = set()
-        for alias_list in PRODUCT_HEADER_MAP.values():
-            recognized.update([normalize_header(h) for h in alias_list])
-
-        unrecognized = [col for col in df.columns if col not in recognized]
+        unrecognized = unexpected_headers(df, PRODUCT_HEADER_MAP)
         if unrecognized:
             st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
 
@@ -56,7 +51,14 @@ if file_type == "Product" and new_file and full_list_file:
         df, auto_changes = update_all_products(df)                       
 
     except Exception as e:
-        st.error(f"Error reading or fixing new product file: {e}")
+        st.error(f"Error reading or fixing new product file: {e}. Excel format may be incorrect.")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+                st.download_button(
+                    label="Upload Templates",
+                    data=file,
+                    file_name="Upload Template Types.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
         st.stop()
 
 # Step 2: Load as Product class objects ----------
@@ -73,8 +75,16 @@ if file_type == "Product" and new_file and full_list_file:
 
 
     except Exception as e:
-        st.error(f"Error loading new product file into Product objects: {e}")
+        st.error(f"Error loading new product file into Product objects: {e}. Excel format may be incorrect.")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+                st.download_button(
+                    label="Upload Templates",
+                    data=file,
+                    file_name="Upload Template Types.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
         st.stop()
+
 
 # Step 3: Load PLU list ---------
     try:
@@ -163,6 +173,7 @@ if file_type == "Product" and new_file and full_list_file:
         st.title("No Auto-fixes Found")
 
 
+
 elif file_type == "Clothing" and new_file and full_list_file:
 # Step 1: Read and normalize new clothing file for auto fixes ---------
 
@@ -179,18 +190,21 @@ elif file_type == "Clothing" and new_file and full_list_file:
             st.success(f"All expected columns found in new file.")
         
     # Keep track of unrecognized header names
-        recognized = set()
-        for alias_list in CLOTHING_HEADER_MAP.values():
-            recognized.update([normalize_header(h) for h in alias_list])
-
-        unrecognized = [col for col in df.columns if col not in recognized]
+        unrecognized = unexpected_headers(df, CLOTHING_HEADER_MAP)
         if unrecognized:
             st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
 
     # Apply auto fixes
         df, auto_changes = update_all_clothing(df)         
     except Exception as e:
-        st.error(f"Error reading or fixing new clothing file: {e}")
+        st.error(f"Error reading or fixing new clothing file: {e}. Excel format may be incorrect.")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+            st.download_button(
+                label="Upload Templates",
+                data=file,
+                file_name="Upload Template Types.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         st.stop()
 
 # Step 2: Load as Product class objects ----------
@@ -203,7 +217,14 @@ elif file_type == "Clothing" and new_file and full_list_file:
                 st.error(message)
 
     except Exception as e:
-        st.error(f"Error loading new clothing file into Clothing objects: {e}")
+        st.error(f"Error loading new clothing file into Clothing objects: {e}. Excel format may be incorrect.")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+            st.download_button(
+                label="Upload Templates",
+                data=file,
+                file_name="Upload Template Types.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         st.stop()
 
 # Step 3: Load Clothing list ---------
@@ -250,7 +271,7 @@ elif file_type == "Clothing" and new_file and full_list_file:
         # if (e := item.desc_len()):
             # clothing_decsc_errors.append(e)
 
-            
+
 # Display Errors
     display_results("All Duplicate Style Code Code Errors", duplicate_style_errors)
     display_results("Duplicate Style Codes Within Uploaded File", internal_duplicates)
@@ -328,7 +349,14 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
         #     df, auto_changes = update_all_products(df)                       
 
     except Exception as e:
-        st.error(f"Error reading or fixing new product file: {e}")
+        st.error(f"Error reading or fixing new product file: {e}. Excel format may be incorrect.")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+            st.download_button(
+                label="Upload Templates",
+                data=file,
+                file_name="Upload Template Types.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         st.stop()
 
     # Step 2: Load as Product class objects ----------
@@ -345,7 +373,14 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
 
 
     except Exception as e:
-        st.error(f"Error loading new product file into Product objects: {e}")
+        st.error(f"Error loading new product file into Product objects: {e}. Excel format may be incorrect")
+        with open("1_Spreadsheets/Upload Template Types.xlsx", "rb") as file:
+            st.download_button(
+                label="Upload Templates",
+                data=file,
+                file_name="Upload Template Types.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         st.stop()
 
     # Step 3: Load PLU list ---------
@@ -388,3 +423,11 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
     else:
         st.header(f"Non-amendable products — 0 issue(s)")
         st.success("All products exist. File is ready for upload.")
+
+
+
+
+
+
+
+

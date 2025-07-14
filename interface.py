@@ -21,12 +21,12 @@ def display_results(title: str, errors: list[str]):
 
 
 st.title("New Product File Validation")
-file_type = st.selectbox("Select File Type", ["Product", "Clothing", "Price Amendment"])
+file_type = st.selectbox("Select File Type", ["Product", "Clothing", "Price Amendment"], key="select_file_type")
 
 # File uploads
-new_file = st.file_uploader(f"Upload New {file_type} File", type=["xlsx"])
-full_list_file = st.file_uploader("Upload PLU Active List", type=["xlsx"])
-
+new_file = st.file_uploader(f"Upload New {file_type} File", type=["xlsx", "csv"],  key=f"upload_{file_type.lower()}")
+# full_list_file = st.file_uploader("Upload PLU Active List", type=["xlsx", "csv"])
+full_list_file = "1_Spreadsheets/CodesList.csv"
 
 # Proceed only if both files uploaded
 if file_type == "Product" and new_file and full_list_file:
@@ -88,10 +88,12 @@ if file_type == "Product" and new_file and full_list_file:
 
 # Step 3: Load PLU, Barcode list ---------
     try:
-        full_list_df = pd.read_excel(full_list_file)
+        # full_list_df = pd.read_excel(full_list_file)
+        full_list_df = pd.read_csv(full_list_file)
+        print(full_list_df.head(5))
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-        full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"])
-        full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
+        full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"], used_columns=None)
+        full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
     
         missing = []
         if message:
@@ -112,7 +114,7 @@ if file_type == "Product" and new_file and full_list_file:
 
 # Error collection ---------
 # duplicate_plu_dict = check_duplicates(products, all_plu)
-    duplicate_plu_dict = check_duplicates(products, full_list_df, "plu_code")
+    duplicate_plu_dict = check_duplicates(products, full_list_plu, "plu_code")
     duplicate_plu_errors = [
         f"Line: {line + 2} \u00A0\u00A0|\u00A0\u00A0 Product {plu} is already in the system."  # +2 to match Excel row (header + 0-indexed)
         for plu, line in duplicate_plu_dict.items()
@@ -121,7 +123,7 @@ if file_type == "Product" and new_file and full_list_file:
     prod_barcode__internal_errors = duplicate_internal_barcodes(products, "plu_code")
     full_prod_barcode_errors = check_duplicates(products, full_list_barcode, "barcode")
     plu_in_barcodes = check_duplicates(products, full_list_barcode, "plu_code")
-    barcodes_in_plu = check_duplicates(products, full_list_df, "barcode")
+    barcodes_in_plu = check_duplicates(products, full_list_plu, "barcode")
     plu_errors = []
     prod_bad_char_errors = []
     

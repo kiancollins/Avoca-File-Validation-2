@@ -346,8 +346,8 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
             if unrecognized:
                 st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
 
-        # # Apply auto-changes
-        #     df, auto_changes = update_all_products(df)                       
+        # Apply auto-changes
+            df, auto_changes = update_all_products(df)                       
 
     except Exception as e:
         st.error(f"Error reading or fixing new product file: {e}. Excel format may be incorrect.")
@@ -369,8 +369,8 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
                 st.success(message)
             elif type == "error":
                 missing.append(message)
-        if missing:
-            st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
+        # if missing:
+        #     st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
 
 
     except Exception as e:
@@ -386,9 +386,9 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
 
     # Step 3: Load PLU list ---------
     try:
-        full_list_df = pd.read_excel(full_list_file)
+        # full_list_df = pd.read_excel(full_list_file)
+        full_list_df = pd.read_csv(full_list_file)
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-        full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"], used_columns=None)
         full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
     
         missing = []
@@ -397,8 +397,8 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
                 st.success(message)
             elif type == "error":
                 missing.append(message)
-        if missing:
-            st.warning(f"Searched for, but couldn't find columns: {missing} in full list upload.")
+        # if missing:
+        #     st.warning(f"Searched for, but couldn't find columns: {missing} in full list upload.")
 
     except KeyError as e:
         st.error(f"Missing PLU column in full list: {e}")
@@ -426,6 +426,20 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
         st.success("All products exist. File is ready for upload.")
 
 
+
+    st.header("Auto-Changes")
+
+    if any(auto_changes.values()):
+            st.write("\n")
+            st.title("Automatically Fixed Errors:")
+
+            for category, changes in auto_changes.items():
+                if changes:
+                    with st.expander(f"{category} ({len(changes)} fixes)", expanded=False):
+                        for change in changes:
+                            st.markdown(f"- {change}")
+    else:
+        st.success("No Auto-changes needed.")
 
 
 

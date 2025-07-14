@@ -90,7 +90,7 @@ if file_type == "Product" and new_file and full_list_file:
     try:
         # full_list_df = pd.read_excel(full_list_file)
         full_list_df = pd.read_csv(full_list_file)
-        print(full_list_df.head(5))
+        # print(full_list_df.head(5))
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
         full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"], used_columns=None)
         full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
@@ -138,7 +138,6 @@ if file_type == "Product" and new_file and full_list_file:
     display_results("Duplicate PLU Code Errors", duplicate_plu_errors)
     display_results("Duplicate PLUs Within Uploaded File", internal_duplicates)
     display_results("PLU Code Length Errors", plu_errors)
-    display_results("Unusable Character Errors", prod_bad_char_errors)
     display_results("Duplicate Barcode Within New Upload", prod_barcode__internal_errors)
     display_results("Duplicate Barcodes In Database", full_prod_barcode_errors)
     display_results("Duplicate PLU's Used As Existing Barcodes", plu_in_barcodes)
@@ -230,10 +229,11 @@ elif file_type == "Clothing" and new_file and full_list_file:
 
 # Step 3: Load Clothing list ---------
     try:
-        full_list_df = pd.read_excel(full_list_file)
+        # full_list_df = pd.read_excel(full_list_file)
+        full_list_df = pd.read_csv(full_list_file)
         full_list_df.columns = [normalize_header(c) for c in full_list_df.columns]
         full_list_barcode, message, type = read_column(full_list_df, CLOTHING_HEADER_MAP["barcode"])
-        full_list_df, message, type = read_column(full_list_df, CLOTHING_HEADER_MAP["style_code"])
+        full_list_style, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
 
         if message:
             if type == "alert":
@@ -249,15 +249,16 @@ elif file_type == "Clothing" and new_file and full_list_file:
         st.stop()
 
 
-    duplicate_styles = check_duplicates(clothes, full_list_df, "style_code")
+    duplicate_styles = check_duplicates(clothes, full_list_style, "style_code")
     duplicate_style_errors = [
         f"Line: {line + 2} \u00A0\u00A0|\u00A0\u00A0 Item {style_code} is already in the system."  # +2 to match Excel row (header + 0-indexed)
         for style_code, line in duplicate_styles.items()
     ]
     internal_duplicates = check_clothing_duplicates(clothes)
     clothing_barcode_errors = duplicate_internal_barcodes(clothes, "style_code")
+    full_clothing_barcode_errors = check_duplicates(clothes, full_list_barcode, "barcode")
     style_code_in_barcodes = check_duplicates(clothes, full_list_barcode, "style_code")
-    barcodes_in_style_code = check_duplicates(clothes, full_list_df, "barcode")
+    barcodes_in_style_code = check_duplicates(clothes, full_list_style, "barcode")
     style_len_errors = []
     clothing_bad_char_errors =[]
 
@@ -275,14 +276,16 @@ elif file_type == "Clothing" and new_file and full_list_file:
     display_results("Duplicate Style Codes Within Uploaded File", internal_duplicates)
     display_results("All Style Code Length Errors", style_len_errors)
     display_results("All Unusable Character Errors", clothing_bad_char_errors)
-    display_results("All Duplicate Barcode Errors", clothing_barcode_errors)
+    display_results("All Duplicate Barcode Errors Within New File", clothing_barcode_errors)
+    display_results("Duplicate Barcodes In Database", full_clothing_barcode_errors)
     display_results("Duplicate Style Codes Used As Existing Barcodes", style_code_in_barcodes)
     display_results("Duplicate Barcodes Used As Existing Style Codes", barcodes_in_style_code)
 
 
 # If no errors
     if not any([duplicate_style_errors, internal_duplicates, style_len_errors, 
-    clothing_bad_char_errors, clothing_barcode_errors, style_code_in_barcodes, barcodes_in_style_code]):
+    clothing_bad_char_errors, clothing_barcode_errors, style_code_in_barcodes, 
+    barcodes_in_style_code, full_clothing_barcode_errors ]):
         st.success("All checks passed. File is ready for upload.")
 
 # Auto fixing ------------------
@@ -385,9 +388,9 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
     try:
         full_list_df = pd.read_excel(full_list_file)
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-        full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
-
-
+        full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"], used_columns=None)
+        full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
+    
         missing = []
         if message:
             if type == "alert":
@@ -406,7 +409,7 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
     
 
 
-    results = check_exist(products, full_list_df, "plu_code")
+    results = check_exist(products, full_list_plu, "plu_code")
 
 
     # if results:

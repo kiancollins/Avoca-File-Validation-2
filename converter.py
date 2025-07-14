@@ -64,7 +64,6 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
     col_map = {}
     used_columns = set()
 
-
     # # Step 1: Resolve headers
     for key in CLOTHING_HEADER_MAP:
         col, message, type = find_header(df, CLOTHING_HEADER_MAP[key], used_columns)
@@ -73,6 +72,7 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
         col_map[key] = col  # May be None if not found
         if message:
             messages.append((message, type))
+
 
 
     # Step 2: Check for required columns
@@ -85,7 +85,7 @@ def load_clothing(df: pd.DataFrame) -> tuple[list[Clothing], list[tuple[str, str
     for idx, row in df.iterrows():
         line_number = idx + 2
         clothing = Clothing(
-            code=row.get(col_map["style_code"]),
+            code=normalizer(row.get(col_map["style_code"])),
             description=row.get(col_map["description"]),
             size=row.get(col_map["size"]),
             colour=row.get(col_map["colour"]),

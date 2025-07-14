@@ -99,3 +99,12 @@ def check_missing_headers(df: pd.DataFrame, header_map: dict[str, list[str]]) ->
             missing.append(key)
     return missing
 
+
+def unexpected_headers(df: pd.DataFrame, header_map):
+    recognized = set()
+    for alias_list in header_map.values():
+        recognized.update([normalize_header(h) for h in alias_list])
+
+    unrecognized = [col for col in df.columns if col not in recognized]
+    if unrecognized:
+        return unrecognized

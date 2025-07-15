@@ -2,9 +2,9 @@ import pandas as pd
 
 from classes.product_class import Product
 from classes.clothing_class import Clothing
+from classes.price_amend_class import Price_Amend
 from utils.headers import *
 from utils.validators import *
-from price_amendment import *
 from utils.normalizer import *
 
 
@@ -130,24 +130,38 @@ def read_column(df: pd.DataFrame, possible_names, used_columns=None) -> list:
 
 
 
+def load_prices(df: pd.DataFrame) -> tuple[list[Product], list[tuple[str, str]]]:
+    """Load the new product file into a list of Product class objects"""
+    # expected_headers = [name for sublist in PRODUCT_HEADER_MAP.values() for name in sublist]
 
+    messages = []
+    
+    # Pre-resolve all needed column names
+    used_columns = set()
+    col_map = {}
+    for key in PRICE_AMENDMENT_HEADER_MAP:
+        col, message, type = find_header(df, PRICE_AMENDMENT_HEADER_MAP[key], used_columns)
+        if col:
+            used_columns.add(col)
+        col_map[key] = col  # May be None if not found
+        if message:
+            messages.append((message, type))
 
-# df = pd.read_excel(NEW_PRODUCTS_JAVADO)
-# df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
-# products, messages = load_products(df)
-# for product in products:
-#     print(product.plu_code)
-#     print(type(product.plu_code))
+    # Build Product objects using resolved column names
+    products = []
+    for idx, row in df.iterrows():
+        line_number = idx + 2
+        product = Price_Amend(
+            code = normalizer(row.get(col_map["plu_code"])),
+            description = row.get(col_map["description"]),
+            main_supplier = row.get(col_map["main_supplier"]),
+            cost_price = row.get(col_map["cost_price"]),
+            rrp = row.get(col_map["rrp"]),
+            sell_price = row.get(col_map["sell_price"]),
+            stg_price = row.get(col_map["stg_price"]),
+            idx = line_number
+        )
+        products.append(product)
 
-# full_list_df = pd.read_excel(PLU_ACTIVE)
-# full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-# full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
-# print(full_list_df[:5])
+    return products, messages
 
-
-# prod_barcode_errors = duplicate_barcodes(products, "plu_code")
-# print(prod_barcode_errors)
-
-
-# errors = check_exist(products, full_list_df, "plu_code")
-# print(errors)

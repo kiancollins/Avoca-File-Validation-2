@@ -29,7 +29,7 @@ def fix_description(df: pd.DataFrame):
 
 def fix_decimals(df: pd.DataFrame):
     """ Numbers have to be rounded to 2 decimal places"""
-    columns = ["cost_price", "rrp", "selling_price", "stg_price"]
+    columns = ["cost_price", "rrp", "sell_price", "stg_price"]
     changes = []
 
     for key in columns:
@@ -45,6 +45,7 @@ def fix_decimals(df: pd.DataFrame):
                     df.at[i, col_name] = new_num
                     changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 {col_name} of {num} rounded to {new_num}")
     return df, changes
+
 
 
 
@@ -84,6 +85,7 @@ def fix_bad_char(df: pd.DataFrame) -> str:
 
 
 
+
 def update_all_products(df: pd.DataFrame):
     df = df.copy()   
     changes_by_type = {}
@@ -94,8 +96,8 @@ def update_all_products(df: pd.DataFrame):
     df, char_changes = fix_bad_char(df)
     changes_by_type["Bad Char Fixes"] = char_changes
 
-    # df, decimal_changes = fix_decimals(df)
-    # changes_by_type["Decimal Fixes"] = decimal_changes
+    df, decimal_changes = fix_decimals(df)
+    changes_by_type["Decimal Fixes"] = decimal_changes
 
     df, vat_changes = fix_vat(df)
     changes_by_type["VAT Fixes"] = vat_changes

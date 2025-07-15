@@ -50,8 +50,6 @@ def duplicate_internal_barcodes(items: list[Product | Clothing], attr:str) -> li
 
 
 
-
-
 def check_internal_duplicates(items: list[Product | Clothing], attr:str) -> dict[int, int]:
     """ Checks if there are any duplicate codes within the new file
         attr should be entered as the class variable name """
@@ -81,20 +79,21 @@ def check_clothing_duplicates(items: list[Clothing]):
     return errors
 
 
-# def bad_char(obj, id_attr: str) -> str:
-#     """ The characters ',% can't be in any product variables. Check if they have any and return where.
-#         Input for id_attr should be the code/name of item preferred when returning an error message.
-#     """
-#     bad_fields = []
-#     for field, value in vars(obj).items():     # Grab each variable and the value for the product
-#             if isinstance(value, str):          # Avoid type error
-#                 if any(char in value for char in BAD_CHARS):    # Check if any bad chars are in the value
-#                     bad_fields.append(field)
 
-#     if bad_fields:
-#             line = getattr(obj, "excel_line", None)
-#             id = getattr(obj, id_attr, None)
-#             return f"Line {line} \u00A0\u00A0|\u00A0\u00A0 {id} contains invalid character(s) {BAD_CHARS}"
+def check_exist(items: list[Product | Clothing], full_list: list, attr: str) -> tuple[dict, dict]:
+    """ Returns dictionary of what item codes are already used in the full list. """
+    nonexist = []
+
+    # Normalize full list once
+    full_list_cleaned = [normalizer(str(x)) for x in full_list]
+
+    for idx, item in enumerate(items):
+        code = normalizer(str(getattr(item, attr, "")))  # Make sure it's a str before normalizing
+        if code not in full_list_cleaned:
+            nonexist.append(f"Line {idx+2} \u00A0\u00A0|\u00A0\u00A0 '{code}' does not currently exist in data base.")
+
+    return nonexist
+
 
 
 

@@ -121,7 +121,12 @@ if file_type == "Product" and new_file and full_list_file:
     ]
     internal_duplicates = check_internal_duplicates(products, "plu_code")
     prod_barcode__internal_errors = duplicate_internal_barcodes(products, "plu_code")
+
     full_prod_barcode_errors = check_duplicates(products, full_list_barcode, "barcode")
+    duplicate_barcode_errors = [
+        f"Line: {line + 2} \u00A0\u00A0|\u00A0\u00A0  Barcode {barcode} is already in the system."  # +2 to match Excel row (header + 0-indexed)
+        for barcode, line in full_prod_barcode_errors.items()
+    ]
     plu_in_barcodes = check_duplicates(products, full_list_barcode, "plu_code")
     barcodes_in_plu = check_duplicates(products, full_list_plu, "barcode")
     plu_errors = []
@@ -139,7 +144,7 @@ if file_type == "Product" and new_file and full_list_file:
     display_results("Duplicate PLUs Within Uploaded File", internal_duplicates)
     display_results("PLU Code Length Errors", plu_errors)
     display_results("Duplicate Barcode Within New Upload", prod_barcode__internal_errors)
-    display_results("Duplicate Barcodes In Database", full_prod_barcode_errors)
+    display_results("Duplicate Barcodes In Database", duplicate_barcode_errors)
     display_results("Duplicate PLU's Used As Existing Barcodes", plu_in_barcodes)
     display_results("Duplicate Barcodes Used As Existing PLU's", barcodes_in_plu)
 

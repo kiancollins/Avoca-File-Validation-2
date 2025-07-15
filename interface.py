@@ -27,9 +27,11 @@ file_type = st.selectbox("Select File Type", ["Product", "Clothing", "Price Amen
 new_file = st.file_uploader(f"Upload New {file_type} File", type=["xlsx", "csv"],  key=f"upload_{file_type.lower()}")
 # full_list_file = st.file_uploader("Upload PLU Active List", type=["xlsx", "csv"])
 full_list_file = "1_Spreadsheets/CodesList.csv"
+full_supplier_file = "1_Spreadsheets/Supplier Code List.CSV"
+
 
 # Proceed only if both files uploaded
-if file_type == "Product" and new_file and full_list_file:
+if file_type == "Product" and new_file and full_list_file and full_supplier_file:
 
 # Step 1: Read and normalize new product file for auto fixes ---------
     try:
@@ -90,11 +92,14 @@ if file_type == "Product" and new_file and full_list_file:
     try:
         # full_list_df = pd.read_excel(full_list_file)
         full_list_df = pd.read_csv(full_list_file)
-        # print(full_list_df.head(5))
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
         full_list_barcode, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["barcode"], used_columns=None)
         full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
     
+        full_supplier_df = pd.read_csv(full_supplier_file)
+        full_supplier_codes = full_supplier_df.iloc[:, 0].dropna().tolist()
+
+
         missing = []
         if message:
             if type == "alert":
@@ -133,7 +138,8 @@ if file_type == "Product" and new_file and full_list_file:
     barcodes_in_plu = check_duplicates(products, full_list_plu, "barcode")
     plu_errors = []
     prod_bad_char_errors = []
-    
+    supplier_exists = check_exist(products, full_supplier_codes, "main_supplier")
+
     
 
 # Check all products and store in proper lists
@@ -149,14 +155,19 @@ if file_type == "Product" and new_file and full_list_file:
     display_results("Duplicate Barcodes In Database", duplicate_barcode_errors)
     display_results("Duplicate PLU's Used As Existing Barcodes", plu_in_barcodes)
     display_results("Duplicate Barcodes Used As Existing PLU's", barcodes_in_plu)
+    display_results("Check If Supplier Code Exists", supplier_exists)
 
 
 # If no errors
     if not any([duplicate_plu_errors, internal_duplicates, plu_errors, 
                  prod_bad_char_errors, 
                 prod_barcode__internal_errors, full_prod_barcode_errors, 
-                plu_in_barcodes, barcodes_in_plu]):
+                plu_in_barcodes, barcodes_in_plu, supplier_exists]):
         st.success("All checks passed. File is ready for upload.")
+
+# Auto Changes
+    st.header("Auto-Changes")
+
 
     if any(auto_changes.values()):
         st.write("\n")
@@ -177,11 +188,11 @@ if file_type == "Product" and new_file and full_list_file:
             file_name= f"Fixed-{new_file.name}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     else:
-        st.title("No Auto-fixes Found")
+        st.success("No Auto-changes needed.")
 
 
 
-elif file_type == "Clothing" and new_file and full_list_file:
+elif file_type == "Clothing" and new_file and full_list_file and full_supplier_file:
 # Step 1: Read and normalize new clothing file for auto fixes ---------
 
     try:
@@ -246,6 +257,9 @@ elif file_type == "Clothing" and new_file and full_list_file:
         full_list_barcode, message, type = read_column(full_list_df, CLOTHING_HEADER_MAP["barcode"])
         full_list_style, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
 
+        full_supplier_df = pd.read_csv(full_supplier_file)
+        full_supplier_codes = full_supplier_df.iloc[:, 0].dropna().tolist()
+
         if message:
             if type == "alert":
                 st.success(message)
@@ -276,6 +290,7 @@ elif file_type == "Clothing" and new_file and full_list_file:
     barcodes_in_style_code = check_duplicates(clothes, full_list_style, "barcode")
     style_len_errors = []
     clothing_bad_char_errors =[]
+    supplier_exists = check_exist(clothes, full_supplier_codes, "main_supplier")
 
     
 
@@ -295,15 +310,19 @@ elif file_type == "Clothing" and new_file and full_list_file:
     display_results("Duplicate Barcodes In Database", full_clothing_barcode_errors)
     display_results("Duplicate Style Codes Used As Existing Barcodes", style_code_in_barcodes)
     display_results("Duplicate Barcodes Used As Existing Style Codes", barcodes_in_style_code)
+    display_results("Check If Supplier Code Exists", supplier_exists)
 
 
 # If no errors
     if not any([duplicate_style_errors, internal_duplicates, style_len_errors, 
     clothing_bad_char_errors, clothing_barcode_errors, style_code_in_barcodes, 
-    barcodes_in_style_code, full_clothing_barcode_errors ]):
+    barcodes_in_style_code, full_clothing_barcode_errors, supplier_exists]):
         st.success("All checks passed. File is ready for upload.")
 
+
 # Auto fixing ------------------
+    st.header("Auto-Changes")
+
     if any(auto_changes.values()):
         st.write("\n")
         st.title("Automatically Fixed Errors:")
@@ -324,42 +343,29 @@ elif file_type == "Clothing" and new_file and full_list_file:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     else:
-        st.title("No Auto-fixes Found")
+        st.success("No Auto-changes needed.")
 
 
 
-elif file_type == "Price Amendment" and new_file and full_list_file:
+elif file_type == "Price Amendment" and new_file and full_list_file and full_supplier_file:
 
-    # # Read new file
-    # df = pd.read_excel(new_file)
-    # df.columns = [col.strip().lower().replace(" ", "") for col in df.columns]  # Optional: normalize columns
-    # products, messages = load_products(df)
 
-    # # Read full list
-    # full_list_df = pd.read_excel(full_list_file)
-    # full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
-    # full_list_df, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"])
-
+# Step 1: Read into dataframe, normalize headers, auto fixes
     try:
-            expected_headers = [name for sublist in PRODUCT_HEADER_MAP.values() for name in sublist]
+            expected_headers = [name for sublist in PRICE_AMENDMENT_HEADER_MAP.values() for name in sublist]
             header_row = detect_header_row(new_file, expected_headers)
             df = pd.read_excel(new_file, header=header_row)
             df.columns = [normalize_header(c) for c in df.columns]
 
-            missing = check_missing_headers(df, PRODUCT_HEADER_MAP)                         # Check missing columns
+            missing = check_missing_headers(df, PRICE_AMENDMENT_HEADER_MAP)                         # Check missing columns
             if not missing:
-            #     st.warning(f"Columns not found in new file: {','.join(missing)}")
-            # else:
                 st.success(f"All expected columns found in new file.")
             
         # Keep track of unrecognized header names
-            recognized = set()
-            for alias_list in PRODUCT_HEADER_MAP.values():
-                recognized.update([normalize_header(h) for h in alias_list])
-
-            unrecognized = [col for col in df.columns if col not in recognized]
+            unrecognized = unexpected_headers(df, PRICE_AMENDMENT_HEADER_MAP)
             if unrecognized:
                 st.info(f"Unrecognized columns in file: {', '.join(unrecognized)}")
+
 
         # Apply auto-changes
             df, auto_changes = update_all_products(df)                       
@@ -375,18 +381,20 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
             )
         st.stop()
 
-    # Step 2: Load as Product class objects ----------
+
+# Step 2: Load as Product class objects ----------
     try:
-        products, messages = load_products(df) # was new file
+        products, messages = load_prices(df) # was new file
         missing = []
         for message, type in messages:
             if type == "alert":
                 st.success(message)
             elif type == "error":
                 missing.append(message)
-        # if missing:
-        #     st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
+        if missing:
+            st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
 
+        print(products[:10])
 
     except Exception as e:
         st.error(f"Error loading new product file into Product objects: {e}. Excel format may be incorrect")
@@ -405,15 +413,18 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
         full_list_df = pd.read_csv(full_list_file)
         full_list_df.columns = [normalize_header(column) for column in full_list_df.columns]
         full_list_plu, message, type = read_column(full_list_df, PRODUCT_HEADER_MAP["plu_code"], used_columns=None)
-    
+        
+        full_supplier_df = pd.read_csv(full_supplier_file)
+        full_supplier_codes = full_supplier_df.iloc[:, 0].dropna().tolist()
+
         missing = []
         if message:
             if type == "alert":
                 st.success(message)
             elif type == "error":
                 missing.append(message)
-        # if missing:
-        #     st.warning(f"Searched for, but couldn't find columns: {missing} in full list upload.")
+        if missing:
+            st.warning(f"Searched for, but couldn't find columns: {missing} in full list upload.")
 
     except KeyError as e:
         st.error(f"Missing PLU column in full list: {e}")
@@ -421,33 +432,27 @@ elif file_type == "Price Amendment" and new_file and full_list_file:
     except Exception as e:
         st.error(f"Error reading PLU Active List: {e}")
         st.stop()
-    
 
 
-    results = check_exist(products, full_list_plu, "plu_code")
+# Checks
+    st.header("Checks")
 
 
-    # if results:
-    #     display_results("Non-amendable products", results)
-    # else:
+    plu_exists = check_exist(products, full_list_plu, "plu_code")
+    supplier_exists = check_exist(products, full_supplier_codes, "main_supplier")
 
+    display_results("Check if PLU code exists", plu_exists)
+    display_results("Check if supplier code exists", supplier_exists)
 
-    if results: 
-        st.header(f"Non-amendable products — {len(results)} issue(s)")
-        for err in results:
-            st.error(f"- {err}")
-    else:
-        st.header(f"Non-amendable products — 0 issue(s)")
-        st.success("All products exist. File is ready for upload.")
+    if not any([plu_exists, supplier_exists]):
+        st.success("All checks passed. File is ready for upload.")
+
 
 
 
     st.header("Auto-Changes")
 
     if any(auto_changes.values()):
-            st.write("\n")
-            st.title("Automatically Fixed Errors:")
-
             for category, changes in auto_changes.items():
                 if changes:
                     with st.expander(f"{category} ({len(changes)} fixes)", expanded=False):

@@ -53,9 +53,9 @@ PRODUCT_HEADER_MAP = {
     "plu_code": ["plu", "plu code", "plucode", "plu-code", "plu_code"],
     "description": ["description", "desc", "productdescription"],
     "subgroup": ["subgroup", "category", "sub", "subcategory", "productsubgroup"],
-    "supplier_code": ["3digitsupplier", "suppliercode", "threedigitsupplier", "3digitsuppliercode", "threedigitsuppliercode"],
+    "supplier_code": ["3digitsupplier", "supplier", "threedigitsupplier", "3digitsuppliercode", "threedigitsuppliercode"],
     "season": ["season"],
-    "main_supplier": ["mainsupplier", "main-supplier", "supplier", "suppliermain", "productsupplier"],
+    "main_supplier": ["suppliercode", "main-supplier", "suppliermain", "productsupplier"],
     "cost_price": ["costprice", "cost"],
     "barcode": ["barcode", "bar code", "productbarcode", "product-barcode", "barcodes", "barcode(s)"],
     "vat_rate": ["vatrate", "vat", "vatcode", "vat-code", "productvatrate", "productvatcode"],
@@ -69,7 +69,7 @@ PRODUCT_HEADER_MAP = {
 
 
 CLOTHING_HEADER_MAP = {
-    "style_code": ["stylecode", "productstylecode", "style-code", "style_code"],
+    "style_code": ["stylecode", "productstylecode", "style-code", "style_code", "plu", "plucode", "plu-code", "plu_code"],
     "description": ["description", "desc"],
     "size": ["size"],
     "colour": ["colour", "color"],
@@ -83,7 +83,7 @@ CLOTHING_HEADER_MAP = {
     "rrp": ["rrp"],
     "sell_price": ["sellingprice", "selling price", "sellprice"],
     "stg_price": ["stgretailprice", "stg retail price", "stgprice"],
-    "tariff": ["tariffcode", "tariff code", "tariff", "tariff"],
+    "tariff": ["tariffcode", "tariff-code", "tariff", "tariff"],
     "brand": ["brandinstore", "brand in store", "brand"],
     "product_type": ["producttype", "product type"],
     "web": ["web", "online", "website", "forweb"],
@@ -93,3 +93,13 @@ CLOTHING_HEADER_MAP = {
 
 
 
+PRICE_AMENDMENT_HEADER_MAP = {
+    "plu_code": ["plu", "plu code", "plucode", "plu-code", "plu_code"],
+    "description": ["description", "desc", "productdescription"],
+    "main_supplier": ["3digitsupplier", "supplier", "threedigitsupplier", "3digitsuppliercode", 
+                      "threedigitsuppliercode",  "suppliercode", "main-supplier", "suppliermain", "productsupplier"],
+    "cost_price": ["costprice", "cost"],
+    "rrp": ["rrp"],
+    "sell_price": ["sellingprice", "sellprice", "priceforsell", "selling", "productsellingprice"],
+    "stg_price": ["stgprice", "stgretailprice", "sterlingprice", "productstgprice"],
+}

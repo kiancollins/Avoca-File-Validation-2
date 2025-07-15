@@ -112,8 +112,10 @@ if file_type == "Product" and new_file and full_list_file:
         st.stop()
     
 
-# Error collection ---------
-# duplicate_plu_dict = check_duplicates(products, all_plu)
+# Step 4: Check for errors
+    st.header("Checks")
+
+
     duplicate_plu_dict = check_duplicates(products, full_list_plu, "plu_code")
     duplicate_plu_errors = [
         f"Line: {line + 2} \u00A0\u00A0|\u00A0\u00A0 Product {plu} is already in the system."  # +2 to match Excel row (header + 0-indexed)
@@ -212,14 +214,18 @@ elif file_type == "Clothing" and new_file and full_list_file:
             )
         st.stop()
 
-# Step 2: Load as Product class objects ----------
+# Step 2: Load as Clothing class objects ----------
     try:
         clothes, messages = load_clothing(df)
+        missing = []
         for message, type, in messages:
             if type == "alert":
                 st.success(message)
             elif type == "error":
-                st.error(message)
+                missing.append(message)
+        if missing:
+            st.warning(f"Searched for, but couldn't find columns: {missing} in clothing file upload.")
+
 
     except Exception as e:
         st.error(f"Error loading new clothing file into Clothing objects: {e}. Excel format may be incorrect.")
@@ -252,6 +258,10 @@ elif file_type == "Clothing" and new_file and full_list_file:
     except Exception as e:
         st.error(f"Error reading full items list: {e}")
         st.stop()
+
+
+# Step 4: Check for errors
+    st.header("Checks")
 
 
     duplicate_styles = check_duplicates(clothes, full_list_style, "style_code")

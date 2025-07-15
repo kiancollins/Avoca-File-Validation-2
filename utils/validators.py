@@ -19,8 +19,9 @@ def check_duplicates(items: list[Product | Clothing], full_list: list, attr: str
     for item in items:
         value = normalizer((getattr(item, attr, None)))
         if value in full_list:
-            duplicates[value] = full_list.index(value)
+            duplicates[value] = items.index(item)
     return duplicates
+
 
 
 def duplicate_internal_barcodes(items: list[Product | Clothing], attr:str) -> list[str]:

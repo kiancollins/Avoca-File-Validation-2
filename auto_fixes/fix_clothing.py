@@ -27,20 +27,24 @@ def fix_description(df: pd.DataFrame):
     return df, changes
 
 
+
 def fix_decimals(df: pd.DataFrame):
-    """Update the decimal rounding/format to the correct 2 decimal places"""
-    columns = ['costprice', 'rrp', 'sellingprice', 'stgprice']
+    """ Numbers have to be rounded to 2 decimal places"""
+    columns = ["cost_price", "rrp", "sell_price", "stg_price"]
     changes = []
-    for column in columns:
-        if column not in df.columns:
+
+    for key in columns:
+        col_name, *_ = find_header(df, CLOTHING_HEADER_MAP[key], used_columns=None)
+        if col_name is None or col_name not in df.columns:
             continue
-        for i, num in df[column].items():
+
+        for i, num in df[col_name].items():
             if isinstance(num, (int, float)) and not math.isnan(num):
                 decimal_val = Decimal(str(num))
                 if -decimal_val.as_tuple().exponent > 2:
                     new_num = round(num, 2)
-                    df.at[i, column] = new_num
-                    changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 {column} of {num} rounded to {new_num}")
+                    df.at[i, col_name] = new_num
+                    changes.append(f"Line {i+2} \u00A0\u00A0|\u00A0\u00A0 {col_name} of {num} rounded to {new_num}")
     return df, changes
 
 

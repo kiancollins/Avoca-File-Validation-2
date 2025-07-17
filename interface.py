@@ -19,13 +19,11 @@ def display_results(title: str, errors: list[str]):
         st.success(success_msg)
 
 
-
 st.title("New Product File Validation")
 file_type = st.selectbox("Select File Type", ["Product", "Clothing", "Price Amendment"], key="select_file_type")
 
 # File uploads
 new_file = st.file_uploader(f"Upload New {file_type} File", type=["xlsx", "csv"],  key=f"upload_{file_type.lower()}")
-# full_list_file = st.file_uploader("Upload PLU Active List", type=["xlsx", "csv"])
 full_list_file = "1_Spreadsheets/CodesList.csv"
 full_supplier_file = "1_Spreadsheets/Supplier Code List.CSV"
 
@@ -147,31 +145,31 @@ if file_type == "Product" and new_file and full_list_file and full_supplier_file
         if (e := product.plu_len()):
             plu_errors.append(e)
         
-# Display errors
-    display_results("Duplicate PLU Code Errors", duplicate_plu_errors)
-    display_results("Duplicate PLUs Within Uploaded File", internal_duplicates)
-    display_results("PLU Code Length Errors", plu_errors)
-    display_results("Duplicate Barcode Within New Upload", prod_barcode__internal_errors)
-    display_results("Duplicate Barcodes In Database", duplicate_barcode_errors)
-    display_results("Duplicate PLU's Used As Existing Barcodes", plu_in_barcodes)
-    display_results("Duplicate Barcodes Used As Existing PLU's", barcodes_in_plu)
-    display_results("Check If Supplier Code Exists", supplier_exists)
-
-
 # If no errors
-    if not any([duplicate_plu_errors, internal_duplicates, plu_errors, 
-                 prod_bad_char_errors, 
-                prod_barcode__internal_errors, full_prod_barcode_errors, 
+    if any([duplicate_plu_errors, internal_duplicates, plu_errors, 
+                prod_barcode__internal_errors, duplicate_barcode_errors, 
                 plu_in_barcodes, barcodes_in_plu, supplier_exists]):
+        st.header("Unresolved Errors")
+        
+        display_results("Duplicate PLU Code Errors", duplicate_plu_errors)
+        display_results("Duplicate PLUs Within Uploaded File", internal_duplicates)
+        display_results("PLU Code Length Errors", plu_errors)
+        display_results("Duplicate Barcode Within New Upload", prod_barcode__internal_errors)
+        display_results("Duplicate Barcodes In Database", duplicate_barcode_errors)
+        display_results("Duplicate PLU's Used As Existing Barcodes", plu_in_barcodes)
+        display_results("Duplicate Barcodes Used As Existing PLU's", barcodes_in_plu)
+        display_results("Check If Supplier Code Exists", supplier_exists)
+        
+# Display errors
+    else:
         st.success("All checks passed. File is ready for upload.")
 
 # Auto Changes
-    st.header("Auto-Changes")
+    st.header("Automatically Fixed Errors:")
 
 
     if any(auto_changes.values()):
         st.write("\n")
-        st.title("Automatically Fixed Errors:")
 
         for category, changes in auto_changes.items():
             if changes:
@@ -182,13 +180,17 @@ if file_type == "Product" and new_file and full_list_file and full_supplier_file
         # Convert to Excel in memory
         buffer = io.BytesIO()
         df.to_excel(buffer, index=False)
+
         st.download_button(
             label="Download Fixed Version",
             data=buffer.getvalue(),
             file_name= f"Fixed-{new_file.name}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
     else:
         st.success("No Auto-changes needed.")
+
+
 
 
 
@@ -300,23 +302,23 @@ elif file_type == "Clothing" and new_file and full_list_file and full_supplier_f
             style_len_errors.append(e)
 
 
-
+    if any([duplicate_style_errors, internal_duplicates, style_len_errors, 
+        clothing_bad_char_errors, clothing_barcode_errors, style_code_in_barcodes, 
+        barcodes_in_style_code, full_clothing_barcode_errors, supplier_exists]):
 # Display Errors
-    display_results("All Duplicate Style Code Code Errors", duplicate_style_errors)
-    display_results("Duplicate Style Codes Within Uploaded File", internal_duplicates)
-    display_results("All Style Code Length Errors", style_len_errors)
-    display_results("All Unusable Character Errors", clothing_bad_char_errors)
-    display_results("All Duplicate Barcode Errors Within New File", clothing_barcode_errors)
-    display_results("Duplicate Barcodes In Database", full_clothing_barcode_errors)
-    display_results("Duplicate Style Codes Used As Existing Barcodes", style_code_in_barcodes)
-    display_results("Duplicate Barcodes Used As Existing Style Codes", barcodes_in_style_code)
-    display_results("Check If Supplier Code Exists", supplier_exists)
+        display_results("All Duplicate Style Code Code Errors", duplicate_style_errors)
+        display_results("Duplicate Style Codes Within Uploaded File", internal_duplicates)
+        display_results("All Style Code Length Errors", style_len_errors)
+        display_results("All Unusable Character Errors", clothing_bad_char_errors)
+        display_results("All Duplicate Barcode Errors Within New File", clothing_barcode_errors)
+        display_results("Duplicate Barcodes In Database", full_clothing_barcode_errors)
+        display_results("Duplicate Style Codes Used As Existing Barcodes", style_code_in_barcodes)
+        display_results("Duplicate Barcodes Used As Existing Style Codes", barcodes_in_style_code)
+        display_results("Check If Supplier Code Exists", supplier_exists)
 
 
 # If no errors
-    if not any([duplicate_style_errors, internal_duplicates, style_len_errors, 
-    clothing_bad_char_errors, clothing_barcode_errors, style_code_in_barcodes, 
-    barcodes_in_style_code, full_clothing_barcode_errors, supplier_exists]):
+    else:
         st.success("All checks passed. File is ready for upload.")
 
 
@@ -394,7 +396,6 @@ elif file_type == "Price Amendment" and new_file and full_list_file and full_sup
         if missing:
             st.warning(f"Searched for, but couldn't find columns: {missing} in new file upload.")
 
-        print(products[:10])
 
     except Exception as e:
         st.error(f"Error loading new product file into Product objects: {e}. Excel format may be incorrect")
@@ -407,7 +408,7 @@ elif file_type == "Price Amendment" and new_file and full_list_file and full_sup
             )
         st.stop()
 
-    # Step 3: Load PLU list ---------
+# Step 3: Load PLU list ---------
     try:
         # full_list_df = pd.read_excel(full_list_file)
         full_list_df = pd.read_csv(full_list_file)
@@ -441,13 +442,12 @@ elif file_type == "Price Amendment" and new_file and full_list_file and full_sup
     plu_exists = check_exist(products, full_list_plu, "plu_code")
     supplier_exists = check_exist(products, full_supplier_codes, "main_supplier")
 
-    display_results("Check if PLU code exists", plu_exists)
-    display_results("Check if supplier code exists", supplier_exists)
+    if any([plu_exists, supplier_exists]):
+        display_results("Check if PLU code exists", plu_exists)
+        display_results("Check if supplier code exists", supplier_exists)
 
-    if not any([plu_exists, supplier_exists]):
+    else:
         st.success("All checks passed. File is ready for upload.")
-
-
 
 
     st.header("Auto-Changes")
